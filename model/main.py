@@ -1,9 +1,13 @@
+import joblib
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-# import pickle5 as pickle
+from joblib import load
+
+scaler = load('scaler.joblib')
+model = load('model.joblib')
 
 
 def create_model(data):
@@ -49,6 +53,12 @@ def main():
     data = get_clean_data()
 
     model, scaler = create_model(data)
+
+    # Save the model and scaler
+    joblib.dump(model, 'model.joblib')
+    joblib.dump(scaler, 'scaler.joblib')
+
+    return model, scaler
 
 
 if __name__ == '__main__':

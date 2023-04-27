@@ -1,6 +1,12 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+
+from joblib import load
+
+scaler = load('scaler.joblib')
+model = load('model.joblib')
 
 
 # Load the data
@@ -13,11 +19,10 @@ def load_data():
 
 data = load_data()
 
-# To make sure all predictions values are scalled between 0 and 1
+# To make sure all predictions values are scaled between 0 and 1
 
 
 def get_scaled_values(input_dict):
-    data = load_data()
 
     X = data.drop(['diagnosis'], axis=1)
 
@@ -86,6 +91,27 @@ def get_radar_chart(input_data):
     return fig
 
 
+def add_predictions(input_data):
+    # Load scaler
+    scaler = load('scaler.joblib')
+
+    # Load model
+    model = load('model.joblib')
+
+    input_array = np.array(list(input_data.values())).reshape(1, -1)
+    # input_scaled = scaler.transform(input_array.reshape(1, -1))
+
+    st.write(input_array)
+
+    # prediction = model.predict(input_scaled)[0]
+
+    # if prediction == 1:
+    #     st.error(
+    #         'Warning: This mass is **malignant**. Please consult a doctor immediately!')
+    # else:
+    #     st.success('Great news: This mass is **benign**.')
+
+
 def app():
     st.set_page_config(
         page_title="Breast Cancer Predictor",
@@ -108,7 +134,7 @@ def app():
         st.plotly_chart(radar_chart)
 
     with col2:
-        st.write('This is column2')
+        add_predictions(input_data)
 
 
 def add_sidebar():
