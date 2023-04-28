@@ -55,7 +55,7 @@ def get_radar_chart(input_data):
            ],
         theta=categories,
         fill='toself',
-        name='Product A'
+        name='Mean'
     ))
     fig.add_trace(go.Scatterpolar(
         r=[input_data['radius_se'], input_data['texture_se'], input_data['perimeter_se'], input_data['area_se'],
@@ -63,7 +63,7 @@ def get_radar_chart(input_data):
            input_data['concave points_se'], input_data['symmetry_se'], input_data['fractal_dimension_se']],
         theta=categories,
         fill='toself',
-        name='Product B'
+        name='Standard Error'
     ))
 
     fig.add_trace(
@@ -99,17 +99,26 @@ def add_predictions(input_data):
     model = load('model.joblib')
 
     input_array = np.array(list(input_data.values())).reshape(1, -1)
-    # input_scaled = scaler.transform(input_array.reshape(1, -1))
+    input_scaled = scaler.transform(input_array).reshape(1, -1)
 
-    st.write(input_array)
+    prediction = model.predict(input_scaled)
 
-    # prediction = model.predict(input_scaled)[0]
+    st.subheader('Cell Cluster Prediction')
 
-    # if prediction == 1:
-    #     st.error(
-    #         'Warning: This mass is **malignant**. Please consult a doctor immediately!')
-    # else:
-    #     st.success('Great news: This mass is **benign**.')
+    if prediction[0] == 0:
+        st.success('Great news: This mass is **benign**.')
+
+        # Get probability estimate for benign
+        proba = model.predict_proba(input_scaled)[0][0]
+        st.write('The probability of this mass being **benign** is:', proba)
+
+    else:
+        st.error(
+            'Warning: This mass is **malignant**. Please consult a doctor immediately!')
+
+        # Get probability estimate for malignant
+        proba = model.predict_proba(input_scaled)[0][1]
+        st.write('The probability of this mass being **malignant** is:', proba)
 
 
 def app():
@@ -121,12 +130,13 @@ def app():
     )
 
     input_data = add_sidebar()
+
     # st.write(input_data)
 
     # Creating a slider for each predictor about 30 of them, since dropped 2
     with st.container():
         st.title('Breast Cancer Predictor')
-        st.write('Please connect this app to your cytology lab to help diagnose breast cancer from your tissue sample. This app makes predictions using a Machine Learning Model whether a breast mass is benign or malignant based in the measurements it receives from your lab. You can also update the measurements manually using the sliders in the sidebar.')
+        st.write('Please connect this app to your cytology lab to help diagnose breast cancer from your tissue sample. This app makes predictions using a Machine Learning Model to determine if a breast mass is benign or malignant based in the measurements it receives from your lab. You can also update the measurements manually using the sliders in the sidebar.')
 
     col1, col2 = st.columns([4, 1])
     with col1:
